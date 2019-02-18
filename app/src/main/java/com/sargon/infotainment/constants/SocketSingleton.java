@@ -48,9 +48,7 @@ public class SocketSingleton {
             getInstance().socket.connect();
         }
 
-        if(!Params.DEBUG) {
-            getInstance().socket.emit(action, params);
-        }
+        getInstance().socket.emit(action, params);
 
     }
 

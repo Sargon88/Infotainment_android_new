@@ -4,10 +4,6 @@ import java.util.Date;
 
 public class Params {
 
-    public static Boolean DEBUG = false; //ricordarsi di disabilitare questa variabile
-
-    //public static final String RASPBERRY = "192.168.43.111";
-    //public static final String RASPBERRY = "192.168.43.208"; //macchina
     public static String RASPBERRY = "192.168.2.176"; //VM ufficio
     public static String SOCKET_PORT = "8080";
     public static String SOCKET_ADDRESS = "http://"+ RASPBERRY + ":" + SOCKET_PORT;
@@ -19,13 +15,6 @@ public class Params {
     public static int TASK_DELAY = 1000;
     public static Boolean KILL_ALL = false;
     public static Date STOP_TIME = null;
-    public static int MAX_CONNECTION_RETRY = 20;
-
-
-
-
-    //temporaly not used
-    public static final String[] IPLIST = {};
-    //public static final String SOCKET_ADDRESS = "http://%s:" + SOCKET_PORT;
+    public static int MAX_CONNECTION_RETRY = 5;
 
 }

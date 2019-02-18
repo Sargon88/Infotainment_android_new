@@ -35,6 +35,10 @@
         <activity
             android:name=".settings.SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
+
+        <service
+            android:name=".service.PhoneStateService"
+            android:enabled="true" />
     </application>
 
 </manifest>

@@ -1,8 +1,6 @@
-package com.sargon.infotainment.Service;
+package com.sargon.infotainment.service;
 
-import android.app.Activity;
 import android.util.Log;
-import android.view.View;
 
 import com.sargon.infotainment.constants.SocketSingleton;
 
