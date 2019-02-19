@@ -71,7 +71,13 @@ public class ConnectionService {
         Log.d(TAG, "Disconnecting");
         this.cListener = c;
 
-        SocketSingleton.disconnect();
+        try {
+            SocketSingleton.disconnect();
+
+        } catch(Exception e){
+            Log.e(TAG, e.toString());
+        }
+
         if(this.cListener != null) {
             c.onDisconnected();
         }

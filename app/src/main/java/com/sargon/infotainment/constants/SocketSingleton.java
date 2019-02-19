@@ -17,10 +17,10 @@ public class SocketSingleton {
     private static final String TAG = SocketSingleton.class.getSimpleName();
 
     private static SocketSingleton instance = null;
-    private Socket socket;
+    private static Socket socket;
     private boolean connected = false;
     private static Context context;
-    private SharedPreferences sharedPref;
+    private static SharedPreferences sharedPref;
 
 
     private SocketSingleton() throws URISyntaxException {
@@ -28,7 +28,7 @@ public class SocketSingleton {
         connected = false;
     }
 
-    private void loadParams(){
+    private static void loadParams(){
         sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
         String ip = sharedPref.getString(SettingsActivity.KEY_RASPBERRY_IP,"Ip Here");
@@ -42,7 +42,7 @@ public class SocketSingleton {
         Params.MAX_CONNECTION_RETRY = Integer.parseInt(retry);
     }
 
-    public void configureSocket() throws URISyntaxException {
+    public static void configureSocket() throws URISyntaxException {
         Log.d(TAG, "Configure Socket");
         loadParams();
 
@@ -74,11 +74,13 @@ public class SocketSingleton {
 
     }
 
-    public static void connect(){
+    public static void connect() throws URISyntaxException {
         Log.d(TAG, "Socket.Connect");
+        configureSocket();
         instance.socket.connect();
     }
     public static void disconnect(){
+        instance.socket.close();
         instance.socket.disconnect();
         instance.connected = false;
         instance = null;

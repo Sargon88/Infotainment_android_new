@@ -9,7 +9,7 @@ public class PhoneStatusSingleton {
     private static final String TAG = PhoneStatusSingleton.class.getSimpleName();
     private static PhoneStatus instance = null;
 
-    public PhoneStatus getInstance(){
+    public static PhoneStatus getInstance(){
         Log.d(TAG, "getInstance");
 
         if(instance == null){

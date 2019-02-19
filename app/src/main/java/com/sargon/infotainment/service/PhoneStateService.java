@@ -13,11 +13,13 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.sargon.infotainment.bean.PhoneStatus;
 import com.sargon.infotainment.constants.PhoneStatusSingleton;
 
 public class PhoneStateService extends Service {
     private static String TAG= PhoneStateService.class.getSimpleName();
     private static Context c;
+    private static PhoneStatus phoneStatus;
 
     public PhoneStateService(){}
     public PhoneStateService(Context applicationContext){
@@ -38,6 +40,9 @@ public class PhoneStateService extends Service {
         super.onStartCommand(intent, flags, startId);
 
         Log.d(TAG, "On Start Command: Build status Object");
+        phoneStatus = PhoneStatusSingleton.getInstance();
+
+        getGpsCoordinates();
 
         return START_STICKY;
     }
@@ -66,12 +71,8 @@ public class PhoneStateService extends Service {
             @Override
             public void onLocationChanged(Location location) {
 
-                if(coordinate == null){
-                    coordinate = new Coordinates();
-                }
-
-                coordinate.setLatitude(Double.toString(location.getLatitude()));
-                coordinate.setLongitude(Double.toString(location.getLongitude()));
+                phoneStatus.setLatitude(Double.toString(location.getLatitude()));
+                phoneStatus.setLongitude(Double.toString(location.getLongitude()));
 
 
             }

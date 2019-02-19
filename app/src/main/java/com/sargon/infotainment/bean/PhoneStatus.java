@@ -6,8 +6,8 @@ import java.util.List;
 public class PhoneStatus {
 
     private String page;
-    private Long longitude;
-    private Long latitude;
+    private String longitude;
+    private String latitude;
     private String callerNum;
     private String yturl;
     private String lastUsbStatus;
@@ -28,19 +28,19 @@ public class PhoneStatus {
         this.page = page;
     }
 
-    public Long getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Long longitude) {
+    public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
 
-    public Long getLatitude() {
+    public String getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Long latitude) {
+    public void setLatitude(String latitude) {
         this.latitude = latitude;
     }
 
