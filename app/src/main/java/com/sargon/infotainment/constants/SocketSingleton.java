@@ -1,6 +1,11 @@
 package com.sargon.infotainment.constants;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.sargon.infotainment.settings.SettingsActivity;
 
 import java.net.URISyntaxException;
 
@@ -14,16 +19,33 @@ public class SocketSingleton {
     private static SocketSingleton instance = null;
     private Socket socket;
     private boolean connected = false;
+    private static Context context;
+    private SharedPreferences sharedPref;
 
 
     private SocketSingleton() throws URISyntaxException {
-
         configureSocket();
         connected = false;
     }
 
+    private void loadParams(){
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        String ip = sharedPref.getString(SettingsActivity.KEY_RASPBERRY_IP,"Ip Here");
+        String port = sharedPref.getString(SettingsActivity.KEY_RASPBERRY_PORT,"Port Here");
+        String retry = sharedPref.getString(SettingsActivity.KEY_MAX_CONN,"5");
+
+
+        Params.RASPBERRY = ip;
+        Params.SOCKET_PORT = port;
+        Params.SOCKET_ADDRESS = "http://"+ ip + ":" + port;
+        Params.MAX_CONNECTION_RETRY = Integer.parseInt(retry);
+    }
+
     public void configureSocket() throws URISyntaxException {
         Log.d(TAG, "Configure Socket");
+        loadParams();
+
         IO.Options opt = new IO.Options();
         opt.reconnection = true;
         opt.reconnectionAttempts = Params.MAX_CONNECTION_RETRY;
@@ -59,6 +81,7 @@ public class SocketSingleton {
     public static void disconnect(){
         instance.socket.disconnect();
         instance.connected = false;
+        instance = null;
 
     }
 
@@ -74,4 +97,7 @@ public class SocketSingleton {
         this.connected = connected;
     }
 
+    public static void setContext(Context c) {
+        context = c;
+    }
 }

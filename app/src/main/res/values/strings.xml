@@ -13,6 +13,7 @@
     <!-- Strings related to Settings -->
     <string name="action_settings">Settings</string>
     <string name="action_disconnect">Disconnect</string>
+    <string name="action_connect">Connect</string>
     <string name="ip_label">IP:</string>
     <string name="pref_header_general">General</string>
 

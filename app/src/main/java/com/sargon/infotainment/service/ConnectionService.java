@@ -1,5 +1,6 @@
 package com.sargon.infotainment.service;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.sargon.infotainment.constants.SocketSingleton;
@@ -13,6 +14,11 @@ public class ConnectionService {
 
     private String TAG = ConnectionService.class.getSimpleName();
     private ConnectionListener cListener;
+    private Context context;
+
+    public ConnectionService(Context c){
+        context = c;
+    }
 
     public interface ConnectionListener{
         void onConnected();
@@ -25,6 +31,7 @@ public class ConnectionService {
         this.cListener = c;
 
         try {
+            SocketSingleton.setContext(context);
             Socket socket = SocketSingleton.getInstance().getSocket();
 
             socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
@@ -55,12 +62,11 @@ public class ConnectionService {
 
         } catch (Exception e){
             Log.e(TAG, e.getLocalizedMessage());
-            cListener.onError(e.getLocalizedMessage());
+            cListener.onError(e.toString());
         }
 
 
     }
-
     public void disconnect(ConnectionListener c){
         Log.d(TAG, "Disconnecting");
         this.cListener = c;

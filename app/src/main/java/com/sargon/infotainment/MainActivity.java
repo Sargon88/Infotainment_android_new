@@ -63,12 +63,18 @@ public class MainActivity extends AppCompatActivity {
 
         //start services
         Log.d(TAG, "Start Services");
-        initializeListeners();
+        connectToServer();
 
     }
 
-    private void initializeListeners(){
-        cService = new ConnectionService();
+    private void connectToServer(){
+        Log.d(TAG, "Connect To Server");
+        if(cService == null){
+            cService = new ConnectionService(context);
+        } else {
+            mService.killServices();
+            cService.disconnect(null);
+        }
 
         Log.i(TAG, "Socket Disconnected. Trying Connect");
         TextView connStatusView = findViewById(R.id.line_1);
@@ -126,11 +132,37 @@ public class MainActivity extends AppCompatActivity {
 
 
     /** MENU **/
+    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+    */
+
+
+    /**
+     * Gets called every time the user presses the menu button.
+     * Use if your menu is dynamic.
+     */
+    private static final int MENU_CONNECT = Menu.FIRST + 1;
+    private static final int MENU_DISCONNECT = Menu.FIRST + 2;
+    private static final int MENU_SETTINGS = Menu.FIRST;
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
+
+        menu.add(0, Menu.FIRST, Menu.NONE, R.string.action_settings);
+
+        if(isConnected){
+            menu.add(0, MENU_DISCONNECT, Menu.NONE, R.string.action_disconnect);
+        }
+        if(!isConnected){
+            menu.add(0, MENU_CONNECT, Menu.NONE, R.string.action_connect);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -140,12 +172,17 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        Log.d(TAG, "MENU ID : " + id);
+        Log.d(TAG, "SETTINGS ID : " + MENU_SETTINGS);
+        Log.d(TAG, "CONNECT ID : " + MENU_CONNECT);
+        Log.d(TAG, "DISCONNECT ID : " + MENU_DISCONNECT);
+
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == MENU_SETTINGS) {
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingsIntent);
             return true;
-        } else if(id == R.id.action_disconnect){
+        } else if(id == MENU_DISCONNECT){
             cService.disconnect(new ConnectionService.ConnectionListener(){
 
                 @Override
@@ -188,6 +225,9 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
             });
+
+        } else if(id == MENU_CONNECT){
+            connectToServer();
 
         }
 
