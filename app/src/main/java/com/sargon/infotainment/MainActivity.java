@@ -118,7 +118,9 @@ public class MainActivity extends AppCompatActivity {
 
                         Log.i(TAG, "OnClick Callback - ERROR");
                         TextView connStatusView = findViewById(R.id.line_1);
+                        TextView ipView = findViewById(R.id.line_2);
                         connStatusView.setText(R.string.error);
+                        ipView.setText("");
                         isConnected = false;
 
                         mService.killServices();
@@ -200,6 +202,8 @@ public class MainActivity extends AppCompatActivity {
                                 Log.i(TAG, "OnClick Callback - DISCONNECTED");
                                 TextView connStatusView = findViewById(R.id.line_1);
                                 connStatusView.setText(R.string.not_connected);
+                                TextView ipView = findViewById(R.id.line_2);
+                                ipView.setText("");
                                 isConnected = false;
 
                                 mService.killServices();

@@ -38,6 +38,7 @@ public class ConnectionService {
 
                 @Override
                 public void call(Object... args) {
+                    Log.d(TAG, "CONNECTED");
                     eventConnectedAction();
                 }
             }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {

@@ -74,6 +74,7 @@ public class PhoneStateService extends Service {
                 phoneStatus.setLatitude(Double.toString(location.getLatitude()));
                 phoneStatus.setLongitude(Double.toString(location.getLongitude()));
 
+                Log.d(TAG, "LATITUDE: " + phoneStatus.getLatitude() + " - LONGITUDE: " + phoneStatus.getLongitude());
 
             }
 
