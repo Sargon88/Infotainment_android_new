@@ -12,8 +12,8 @@ public class PhoneStatus {
     private String yturl;
     private String lastUsbStatus;
     private int  brightness;
-    private List<CallModel> lastCalls;
-    private List<CallModel> starredContacts; //CONTROL
+    private List<CallHistoryBean> lastCalls;
+    private List<ContactBean> starredContacts; //CONTROL
     private Date lastUpdate;
     private Boolean calling;
     private Boolean inCall;
@@ -76,19 +76,19 @@ public class PhoneStatus {
         this.brightness = brightness;
     }
 
-    public List<CallModel> getLastCalls() {
+    public List<CallHistoryBean> getLastCalls() {
         return lastCalls;
     }
 
-    public void setLastCalls(List<CallModel> lastCalls) {
+    public void setLastCalls(List<CallHistoryBean> lastCalls) {
         this.lastCalls = lastCalls;
     }
 
-    public List<CallModel> getStarredContacts() {
+    public List<ContactBean> getStarredContacts() {
         return starredContacts;
     }
 
-    public void setStarredContacts(List<CallModel> starredContacts) {
+    public void setStarredContacts(List<ContactBean> starredContacts) {
         this.starredContacts = starredContacts;
     }
 
@@ -117,6 +117,9 @@ public class PhoneStatus {
     }
 
     public NavbarModel getNavbar() {
+        if(navbar == null){
+            navbar = new NavbarModel();
+        }
         return navbar;
     }
 

@@ -56,24 +56,13 @@ public class MainService extends Application{
         Log.i(TAG, "Start Background Services");
 
 
-        phoneStateService = new PhoneStateService(context);
+        phoneStateService = new PhoneStateService();
         psServiceIntent = new Intent(context, phoneStateService.getClass());
 
         if(!isMyServiceRunning(phoneStateService.getClass(), context)){
             Log.i(TAG, "Starting PhoneStateService");
             context.startForegroundService(psServiceIntent);
         }
-
-        /*
-        Log.i(TAG, "Raspbian Socket connected - Start SocketEventsListenersService");
-        socketEventsListeners = new SocketEventsListenersService(context);
-        socketEventsLisIntent = new Intent(context, socketEventsListeners.getClass());
-
-        if(!isMyServiceRunning(socketEventsListeners.getClass(), context)){
-            Log.i(TAG, "Starting SocketEventsListenersService");
-            context.startForegroundService(socketEventsLisIntent);
-        }
-        */
     }
     public void killServices(){
         Log.i(TAG, "Kill Background Services");

@@ -10,24 +10,29 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.TextView;
 
+import com.sargon.infotainment.R;
 import com.sargon.infotainment.bean.PhoneStatus;
+import com.sargon.infotainment.constants.Params;
 import com.sargon.infotainment.constants.PhoneStatusSingleton;
+import com.sargon.infotainment.constants.SocketEvents;
+import com.sargon.infotainment.constants.SocketSingleton;
+
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class PhoneStateService extends Service {
     private static String TAG= PhoneStateService.class.getSimpleName();
-    private static Context c;
+    private Context c;
     private static PhoneStatus phoneStatus;
 
     public PhoneStateService(){}
-    public PhoneStateService(Context applicationContext){
-        super();
-        c = applicationContext; //sempre per primo
-
-        Log.d(TAG, "PhoneStateService");
-    }
 
     @Override
     public void onCreate(){
@@ -43,6 +48,7 @@ public class PhoneStateService extends Service {
         phoneStatus = PhoneStatusSingleton.getInstance();
 
         getGpsCoordinates();
+        startTimer();
 
         return START_STICKY;
     }
@@ -57,6 +63,16 @@ public class PhoneStateService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private Timer timer;
+    public void startTimer(){
+        Log.d(TAG, "startTimer");
+        timer = new Timer();
+
+        initializeStatusTask();
+        timer.schedule(statusTask, Params.TASK_DELAY, Params.PHONE_STATUS_TASK_FREQUENCE);
+
     }
 
     //gps
@@ -76,6 +92,7 @@ public class PhoneStateService extends Service {
 
                 Log.d(TAG, "LATITUDE: " + phoneStatus.getLatitude() + " - LONGITUDE: " + phoneStatus.getLongitude());
 
+                sendMessage();
             }
 
             @Override
@@ -95,8 +112,36 @@ public class PhoneStateService extends Service {
 
         };
 
-        lManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, lListener);
-        lManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, lListener);
+        lManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, lListener);
+        lManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500, 0, lListener);
 
+    }
+
+    //status
+    private TimerTask statusTask;
+    public void initializeStatusTask(){
+        statusTask = new TimerTask() {
+            @Override
+            public void run() {
+                sendMessage();
+            }
+        };
+    }
+
+    private void sendMessage(){
+        if(Looper.myLooper() == null){
+            Looper.prepare();
+        }
+
+        //sarebbe opportuno facesse solo l'invio e non l'update...
+        //si potrebbe temporizzare l'update e poi fare l'invio in questo caso
+        String statusJson = PhoneStatusDataBuilder.getInstance().collectStatusData(getApplicationContext());
+
+        try {
+            SocketSingleton.sendDataToRaspberry(SocketEvents.phoneStatus_event, statusJson);
+
+        } catch (URISyntaxException e) {
+            Log.e(TAG, e.getLocalizedMessage());
+        }
     }
 }

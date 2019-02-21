@@ -24,6 +24,7 @@ public class NavbarModel {
 
     public void setBattInt(int battInt) {
         this.battInt = battInt;
+        setBatt(Integer.toString(battInt));
     }
 
     public String getBatt() {
