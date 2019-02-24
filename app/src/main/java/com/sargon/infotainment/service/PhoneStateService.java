@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.sargon.infotainment.R;
 import com.sargon.infotainment.bean.PhoneStatus;
 import com.sargon.infotainment.constants.Params;
@@ -92,7 +93,18 @@ public class PhoneStateService extends Service {
 
                 Log.d(TAG, "LATITUDE: " + phoneStatus.getLatitude() + " - LONGITUDE: " + phoneStatus.getLongitude());
 
-                sendMessage();
+                //sendMessage();
+
+                try {
+
+                    Gson g = new Gson();
+                    String json = g.toJson(PhoneStatusSingleton.getInstance());
+
+                    SocketSingleton.sendDataToRaspberry(SocketEvents.phoneStatus_event, json);
+
+                } catch (URISyntaxException e) {
+                    Log.e(TAG, e.getLocalizedMessage());
+                }
             }
 
             @Override
