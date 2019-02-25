@@ -4,8 +4,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private MainService mService;
     private ConnectionService cService;
     private Boolean isConnected = false;
-    private String message = "";
+    private Boolean connecting = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
         connStatusView.setText(R.string.connecting);
         ipView.setText(Params.SOCKET_ADDRESS);
+        connecting = true;
 
         cService.connect(new ConnectionService.ConnectionListener(){
 
@@ -96,7 +99,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.i(TAG, "CONNECTED");
                         TextView connStatusView = findViewById(R.id.line_1);
                         connStatusView.setText(R.string.connected);
+                        TextView ipView = findViewById(R.id.line_2);
+                        ipView.setText(Params.SOCKET_ADDRESS);
                         isConnected = true;
+                        connecting = false;
 
                         mService.startBgServices();
                     }
@@ -122,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
                         connStatusView.setText(R.string.error);
                         ipView.setText("");
                         isConnected = false;
+                        connecting = false;
 
                         mService.killServices();
                     }
@@ -148,10 +155,10 @@ public class MainActivity extends AppCompatActivity {
 
         menu.add(0, Menu.FIRST, Menu.NONE, R.string.action_settings);
 
-        if(isConnected){
+        if(isConnected || connecting){
             menu.add(0, MENU_DISCONNECT, Menu.NONE, R.string.action_disconnect);
         }
-        if(!isConnected){
+        if(!isConnected && !connecting){
             menu.add(0, MENU_CONNECT, Menu.NONE, R.string.action_connect);
         }
 
@@ -184,13 +191,14 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
 
-                            if(isConnected) {
+                            if(isConnected || connecting) {
                                 Log.i(TAG, "OnClick Callback - DISCONNECTED");
                                 TextView connStatusView = findViewById(R.id.line_1);
                                 connStatusView.setText(R.string.not_connected);
                                 TextView ipView = findViewById(R.id.line_2);
                                 ipView.setText("");
                                 isConnected = false;
+                                connecting = false;
 
                                 mService.killServices();
                             }
@@ -217,6 +225,16 @@ public class MainActivity extends AppCompatActivity {
             });
 
         } else if(id == MENU_CONNECT){
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+
+            String ip = sharedPref.getString(SettingsActivity.KEY_RASPBERRY_IP,"Ip Here");
+            String port = sharedPref.getString(SettingsActivity.KEY_RASPBERRY_PORT,"Port Here");
+
+
+            Params.RASPBERRY = ip;
+            Params.SOCKET_PORT = port;
+            Params.SOCKET_ADDRESS = "http://"+ ip + ":" + port;
+
             connectToServer();
 
         }
