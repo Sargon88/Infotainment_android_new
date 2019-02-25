@@ -12,6 +12,8 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
@@ -19,6 +21,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.ITelephony;
+import com.sargon.infotainment.R;
+import com.sargon.infotainment.constants.Params;
 import com.sargon.infotainment.constants.SocketEvents;
 import com.sargon.infotainment.constants.SocketSingleton;
 
@@ -33,6 +37,7 @@ public class ConnectionService {
     private String TAG = ConnectionService.class.getSimpleName();
     private ConnectionListener cListener;
     private Context context;
+    private int notificationIdConnect = 1;
 
     public ConnectionService(Context c){
         context = c;
@@ -49,6 +54,14 @@ public class ConnectionService {
         this.cListener = c;
 
         try {
+            //notification
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Params.CONNECTION_CHANNEL_ID)
+                    .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setAutoCancel(false)
+                    .setVibrate(notifyVibratePatternNoRepeat())
+                    .setOngoing(true);
+
             SocketSingleton.setContext(context);
             Socket socket = SocketSingleton.getInstance().getSocket();
 
@@ -57,21 +70,33 @@ public class ConnectionService {
                 public void call(Object... args) {
                     Log.d(TAG, "CONNECTED");
                     eventConnectedAction();
+
+                    builder.setContentTitle("Connesso")
+                            .setContentText("Connesso al sistema");
+
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+
+                    // notificationId is a unique int for each notification that you must define
+                    notificationManager.notify(notificationIdConnect, builder.build());
                 }
             }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     eventDisconnectedAction();
+
+                    dismissNotification();
                 }
             }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     eventConnectionErrorAction();
+                    dismissNotification();
                 }
             }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     eventConnectionErrorAction();
+                    dismissNotification();
                 }
             }).on(SocketEvents.answerCall_event, new Emitter.Listener() {
                 private static final String TAG = "answerCall";
@@ -255,5 +280,23 @@ public class ConnectionService {
             //deprecated in API 26
             v.vibrate(500);
         }
+    }
+
+    /** UTILITY **/
+    //not working well
+    private long[] notifyVibratePatternNoRepeat() {
+        // 0 : Start without a delay
+        // 400 : Vibrate for 400 milliseconds
+        // 100 : Pause for 100 milliseconds
+        // 600 : Vibrate for 400 milliseconds
+        return new long[]{0, 400, 100, 400};
+
+    }
+    private void dismissNotification(){
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.cancel(notificationIdConnect);
+
     }
 }

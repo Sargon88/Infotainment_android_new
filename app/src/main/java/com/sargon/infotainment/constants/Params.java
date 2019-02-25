@@ -16,5 +16,6 @@ public class Params {
     public static Boolean KILL_ALL = false;
     public static Date STOP_TIME = null;
     public static int MAX_CONNECTION_RETRY = 5;
+    public static String CONNECTION_CHANNEL_ID = "connection_notifications";
 
 }

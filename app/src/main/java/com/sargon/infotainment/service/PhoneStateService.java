@@ -2,12 +2,15 @@ package com.sargon.infotainment.service;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -32,6 +35,8 @@ public class PhoneStateService extends Service {
     private static String TAG= PhoneStateService.class.getSimpleName();
     private Context c;
     private static PhoneStatus phoneStatus;
+    private LocationManager lManager;
+    private LocationListener lListener;
 
     public PhoneStateService(){}
 
@@ -39,6 +44,7 @@ public class PhoneStateService extends Service {
     public void onCreate(){
         super.onCreate();
         Log.d(TAG, "On Create");
+        createNotificationChannel();
         startForeground(1, new Notification());
     }
     @Override
@@ -56,6 +62,8 @@ public class PhoneStateService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
+        statusTask.cancel();
+        lManager.removeUpdates(lListener);
 
         Log.i(TAG, "EXIT, onDestroy");
 
@@ -81,9 +89,9 @@ public class PhoneStateService extends Service {
     private void getGpsCoordinates(){
         Log.i(TAG, "getGpsCoordinates");
 
-        LocationManager lManager = (LocationManager) getSystemService(c.LOCATION_SERVICE);
+        lManager = (LocationManager) getSystemService(c.LOCATION_SERVICE);
 
-        LocationListener lListener = new LocationListener() {
+        lListener = new LocationListener() {
 
             @Override
             public void onLocationChanged(Location location) {
@@ -154,6 +162,22 @@ public class PhoneStateService extends Service {
 
         } catch (URISyntaxException e) {
             Log.e(TAG, e.getLocalizedMessage());
+        }
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.notification_channel_name);
+            String description = getString(R.string.notification_channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(Params.CONNECTION_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
         }
     }
 }

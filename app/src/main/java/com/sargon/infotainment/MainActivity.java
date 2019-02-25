@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.sargon.infotainment.receiver.PhoneStateReceiver;
 import com.sargon.infotainment.service.ConnectionService;
 import com.sargon.infotainment.service.MainService;
 import com.sargon.infotainment.constants.Params;
@@ -130,20 +131,11 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
 
     /** MENU **/
-    /*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-    */
-
-
     /**
      * Gets called every time the user presses the menu button.
      * Use if your menu is dynamic.
@@ -173,11 +165,6 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        Log.d(TAG, "MENU ID : " + id);
-        Log.d(TAG, "SETTINGS ID : " + MENU_SETTINGS);
-        Log.d(TAG, "CONNECT ID : " + MENU_CONNECT);
-        Log.d(TAG, "DISCONNECT ID : " + MENU_DISCONNECT);
 
         //noinspection SimplifiableIfStatement
         if (id == MENU_SETTINGS) {

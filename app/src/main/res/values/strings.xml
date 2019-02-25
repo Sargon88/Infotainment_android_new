@@ -36,6 +36,10 @@
     <string name="max_connection_label">Max Connection Retry</string>
     <string name="title_activity_settings">Settings</string>
 
+    <!-- NOTIFICATION -->
+    <string name="notification_channel_name">Infotainment Channel</string>
+    <string name="notification_channel_description">Infotainment Channel</string>
+
 
 
 </resources>

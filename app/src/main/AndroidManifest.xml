@@ -39,6 +39,14 @@
         <service
             android:name=".service.PhoneStateService"
             android:enabled="true" />
+
+        <receiver android:name=".receiver.PhoneStateReceiver" android:exported="true" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
+                <action android:name="android.intent.action.PHONE_STATE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

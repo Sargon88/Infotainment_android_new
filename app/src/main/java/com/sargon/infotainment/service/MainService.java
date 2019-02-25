@@ -73,13 +73,6 @@ public class MainService extends Application{
         Intent phoneStateServiceIntent = new Intent(context, PhoneStateService.class);
         context.stopService(phoneStateServiceIntent);
 
-        /*
-        try {
-            SocketSingleton.getInstance().getSocket().close();
-        } catch (URISyntaxException e) {
-            Log.e(TAG, e.getMessage());
-        }
-        */
     }
 
 
