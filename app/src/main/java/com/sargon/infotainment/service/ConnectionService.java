@@ -1,6 +1,7 @@
 package com.sargon.infotainment.service;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +22,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.ITelephony;
+import com.sargon.infotainment.MainActivity;
 import com.sargon.infotainment.R;
 import com.sargon.infotainment.constants.Params;
 import com.sargon.infotainment.constants.SocketEvents;
@@ -55,12 +57,17 @@ public class ConnectionService {
 
         try {
             //notification
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Params.CONNECTION_CHANNEL_ID)
                     .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setAutoCancel(false)
                     .setVibrate(notifyVibratePatternNoRepeat())
-                    .setOngoing(true);
+                    .setOngoing(true)
+                    .setContentIntent(pendingIntent);
 
             SocketSingleton.setContext(context);
             Socket socket = SocketSingleton.getInstance().getSocket();

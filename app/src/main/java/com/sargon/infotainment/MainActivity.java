@@ -13,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.sargon.infotainment.receiver.PhoneStateReceiver;
 import com.sargon.infotainment.service.ConnectionService;
 import com.sargon.infotainment.service.MainService;
 import com.sargon.infotainment.constants.Params;
