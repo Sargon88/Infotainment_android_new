@@ -10,6 +10,7 @@ public class SocketEvents {
     public static final String startPhoneCall_event = "start phone call";
     public static final String phoneStatus_event = "phone status";
     public static final String coordinates_event = "coordinates";
+    public static final String identify_event = "identify";
 
 
 

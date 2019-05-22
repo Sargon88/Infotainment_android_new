@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
@@ -22,6 +23,7 @@ import com.sargon.infotainment.service.PhoneStatusDataBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class PhoneStateReceiver extends BroadcastReceiver {
@@ -30,7 +32,8 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     private static int lastState = TelephonyManager.CALL_STATE_IDLE;
     private static Date callStartTime;
     private static boolean isIncoming;
-    private static String savedNumber;
+    private static String savedNumber = "Unknown Number";
+    private static Context context;
 
     public PhoneStateReceiver(){}
 
@@ -40,8 +43,12 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(Context inputContext, Intent intent) {
          Log.i("ccc1 " + TAG, intent.getAction());
+
+         if(inputContext != null && context == null){
+             context = inputContext;
+         }
 
          if(intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")){
              savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
@@ -61,20 +68,25 @@ public class PhoneStateReceiver extends BroadcastReceiver {
              }
 
 
-             onCallStateChanged(context, state, number);
+             onCallStateChanged(state, number);
          }
 
     }
 
     //Incoming call-  goes from IDLE to RINGING when it rings, to OFFHOOK when it's answered, to IDLE when its hung up
     //Outgoing call-  goes from IDLE to OFFHOOK when it dials out, to IDLE when hung up
-    public void onCallStateChanged(Context context, int state, String number) {
+    public void onCallStateChanged(int state, String number) {
+
         Log.i("ccc " + TAG, "ENTERED onCallStateChanged");
 
         if(lastState == state){
             Log.i("ccc " + TAG, "No Change");
             //No change, debounce extras
             return;
+        }
+
+        if(number == "" || number == null){
+            number = "Unknown Number";
         }
 
         Log.i("ccc " + TAG, "State: " + state);
@@ -102,6 +114,9 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                 case TelephonyManager.CALL_STATE_IDLE:
 
                     try {
+                        if(number == null){
+                            number = "";
+                        }
                         SocketSingleton.getInstance().sendDataToRaspberry("call end", number);
                         PhoneStatusDataBuilder.getInstance().updateStatusData(context);
 
@@ -169,12 +184,12 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     /** UTILITY */
     private String getExtraCallData(Context c, String incomingNumber, String type){
 
-        Log.d("ccc " + TAG, "incoming NUmber: " + incomingNumber + " - type: " + type);
+        Log.d("ccc " + TAG, "incoming Number: " + incomingNumber + " - type: " + type);
 
         //inizio
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
         String name = "";
-        String date = "";
+        String date = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date());
         String base64Image = "";
         Long contactId;
         Bitmap photo = BitmapFactory.decodeResource(c.getResources(), R.drawable.default_user);

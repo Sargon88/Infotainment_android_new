@@ -48,11 +48,11 @@ public class PhoneStateService extends Service {
     public void onCreate(){
         super.onCreate();
         Log.d(TAG, "On Create");
-    /*
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel();
         }
-    */
+
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Params.CONNECTION_CHANNEL_ID);
         Notification notification = notificationBuilder.setOngoing(true)
@@ -82,7 +82,10 @@ public class PhoneStateService extends Service {
         if(statusTask != null){
             statusTask.cancel();
         }
-        lManager.removeUpdates(lListener);
+
+        if(lManager != null){
+            lManager.removeUpdates(lListener);
+        }
 
         Log.i(TAG, "EXIT, onDestroy");
 

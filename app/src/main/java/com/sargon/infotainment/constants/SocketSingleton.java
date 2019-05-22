@@ -68,7 +68,12 @@ public class SocketSingleton {
     public static void sendDataToRaspberry(String action, String params) throws URISyntaxException {
         Log.i(TAG + "sendDataToRaspberry", params);
 
-        if(getInstance().connected == false){
+        if(SocketSingleton.getContext() == null){
+            Log.i(TAG + "sendDataToRaspberry", "!!!!!!! SocketSingleton.getContext() == null");
+            SocketSingleton.setContext(context);
+        }
+
+        if(getInstance().connected == false && context != null){
             getInstance().socket.connect();
         }
 
@@ -100,6 +105,7 @@ public class SocketSingleton {
         this.connected = connected;
     }
 
+    public static Context getContext() { return context; }
     public static void setContext(Context c) {
         context = c;
     }

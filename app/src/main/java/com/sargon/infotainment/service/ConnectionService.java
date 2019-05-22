@@ -20,6 +20,7 @@ import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.android.internal.telephony.ITelephony;
 import com.sargon.infotainment.MainActivity;
@@ -207,7 +208,6 @@ public class ConnectionService {
                                     intent.setData(Uri.parse(dial));
 
                                     context.startActivity(intent);
-
                                 }
                             } else {
                                 Log.w(TAG, "No phone number");
@@ -218,6 +218,23 @@ public class ConnectionService {
                             return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
                         }
 
+                    });
+                }
+            }).on("connect", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                SocketSingleton.sendDataToRaspberry(SocketEvents.identify_event, "Mobile Phone");
+
+                            } catch (URISyntaxException e) {
+                                Log.e(TAG, e.getLocalizedMessage());
+                            }
+                        }
                     });
                 }
             });
