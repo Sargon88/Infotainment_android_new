@@ -101,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
                         connStatusView.setText(R.string.connected);
                         TextView ipView = findViewById(R.id.line_2);
                         ipView.setText(Params.SOCKET_ADDRESS);
+                        TextView line3 = findViewById(R.id.line_3);
+                        line3.setText("");
                         isConnected = true;
                         connecting = false;
 
@@ -112,7 +114,18 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onDisconnected() { }
+            public void onDisconnected(String message) {
+                Log.i(TAG, "ON DISCONNECTED");
+
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        TextView ipView = findViewById(R.id.line_3);
+                        ipView.setText(message);
+                    }
+                });
+            }
 
             @Override
             public void onError(String message) {
@@ -184,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onConnected() { }
 
                 @Override
-                public void onDisconnected() {
+                public void onDisconnected(String message) {
 
                     runOnUiThread(new Runnable() {
 
@@ -197,6 +210,8 @@ public class MainActivity extends AppCompatActivity {
                                 connStatusView.setText(R.string.not_connected);
                                 TextView ipView = findViewById(R.id.line_2);
                                 ipView.setText("");
+                                TextView line3 = findViewById(R.id.line_3);
+                                line3.setText("");
                                 isConnected = false;
                                 connecting = false;
 

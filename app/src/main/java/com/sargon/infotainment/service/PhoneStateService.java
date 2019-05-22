@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -31,6 +32,9 @@ import java.net.URISyntaxException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
+
 public class PhoneStateService extends Service {
     private static String TAG= PhoneStateService.class.getSimpleName();
     private Context c;
@@ -44,8 +48,21 @@ public class PhoneStateService extends Service {
     public void onCreate(){
         super.onCreate();
         Log.d(TAG, "On Create");
-        createNotificationChannel();
-        startForeground(1, new Notification());
+    /*
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
+    */
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Params.CONNECTION_CHANNEL_ID);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
+                .setPriority(IMPORTANCE_LOW)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .build();
+
+        startForeground(101, notification);
+
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
@@ -62,7 +79,9 @@ public class PhoneStateService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        statusTask.cancel();
+        if(statusTask != null){
+            statusTask.cancel();
+        }
         lManager.removeUpdates(lListener);
 
         Log.i(TAG, "EXIT, onDestroy");

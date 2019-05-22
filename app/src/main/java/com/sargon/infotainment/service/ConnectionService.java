@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import io.socket.engineio.client.EngineIOException;
 
 public class ConnectionService {
 
@@ -47,7 +48,7 @@ public class ConnectionService {
 
     public interface ConnectionListener{
         void onConnected();
-        void onDisconnected();
+        void onDisconnected(String message);
         void onError(String message);
     }
 
@@ -90,19 +91,20 @@ public class ConnectionService {
                 @Override
                 public void call(Object... args) {
                     eventDisconnectedAction();
-
                     dismissNotification();
                 }
             }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    eventConnectionErrorAction();
+                    EngineIOException exc = (EngineIOException) args[0];
+                    eventConnectionErrorAction(exc.getCause().getLocalizedMessage());
                     dismissNotification();
                 }
             }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    eventConnectionErrorAction();
+                    EngineIOException exc = (EngineIOException) args[0];
+                    eventConnectionErrorAction(exc.getCause().getLocalizedMessage());
                     dismissNotification();
                 }
             }).on(SocketEvents.answerCall_event, new Emitter.Listener() {
@@ -239,7 +241,7 @@ public class ConnectionService {
         }
 
         if(this.cListener != null) {
-            c.onDisconnected();
+            c.onDisconnected(null);
         }
 
     }
@@ -260,18 +262,18 @@ public class ConnectionService {
         try {
             SocketSingleton.getInstance().setConnected(false);
             Log.i(TAG, "SOCKET DISCONNECTED");
-            cListener.onDisconnected();
+            cListener.onDisconnected(null);
 
         } catch (URISyntaxException e) {
             Log.e(TAG, e.getLocalizedMessage());
             cListener.onError(e.getLocalizedMessage());
         }
     }
-    private void eventConnectionErrorAction() {
+    private void eventConnectionErrorAction(String message) {
         try {
             SocketSingleton.getInstance().setConnected(false);
             Log.i(TAG, "SOCKET DISCONNECTED");
-            cListener.onDisconnected();
+            cListener.onDisconnected(message);
 
         } catch (URISyntaxException e) {
             Log.e(TAG, e.getLocalizedMessage());
