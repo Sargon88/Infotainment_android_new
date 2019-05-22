@@ -34,6 +34,7 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     private static boolean isIncoming;
     private static String savedNumber = "Unknown Number";
     private static Context context;
+    private static Intent intent;
 
     public PhoneStateReceiver(){}
 
@@ -43,27 +44,41 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(Context inputContext, Intent intent) {
-         Log.i("ccc1 " + TAG, intent.getAction());
+    public void onReceive(Context inputContext, Intent inputIntent) {
+         Log.i("ccc1 " + TAG, inputIntent.getAction());
 
-         if(inputContext != null && context == null){
+         if(inputContext != null){
+             Log.i("ccc1 " + TAG, "UPDATE CONTEXT");
              context = inputContext;
+         }
+
+         if(inputIntent != null){
+             Log.i("ccc1 " + TAG, "UPDATE INTENT");
+             intent = inputIntent;
          }
 
          if(intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")){
              savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
+             Log.i("ccc1 " + TAG, "Entered android.intent.action.NEW_OUTGOING_CALL: " + savedNumber);
+
+             String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
 
          } else if(intent.getAction().equals("android.intent.action.PHONE_STATE")) {
 
              String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
              String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+             Log.i("ccc1 " + TAG, "State: " + stateStr);
+
              int state = 0;
 
              if(stateStr.equals(TelephonyManager.EXTRA_STATE_IDLE)){
+                 Log.i("ccc1 " + TAG, "Entered " + TelephonyManager.EXTRA_STATE_IDLE);
                  state = TelephonyManager.CALL_STATE_IDLE;
              } else if(stateStr.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)){
+                 Log.i("ccc1 " + TAG, "Entered " + TelephonyManager.EXTRA_STATE_OFFHOOK);
                  state = TelephonyManager.CALL_STATE_OFFHOOK;
              } else if(stateStr.equals(TelephonyManager.EXTRA_STATE_RINGING)){
+                 Log.i("ccc1 " + TAG, "Entered " + TelephonyManager.EXTRA_STATE_RINGING);
                  state = TelephonyManager.CALL_STATE_RINGING;
              }
 
@@ -85,10 +100,6 @@ public class PhoneStateReceiver extends BroadcastReceiver {
             return;
         }
 
-        if(number == "" || number == null){
-            number = "Unknown Number";
-        }
-
         Log.i("ccc " + TAG, "State: " + state);
         try{
             switch (state) {
@@ -96,6 +107,14 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                 case TelephonyManager.CALL_STATE_RINGING:
                     isIncoming = true;
                     callStartTime = new Date();
+                    if(number == null || number == ""){
+                        number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+
+                        if(number == "" || number == null){
+                            number = "Unknown Number";
+                        }
+                    }
+
                     savedNumber = number;
                     onIncomingCallStarted(context, number, callStartTime);
                     break;
