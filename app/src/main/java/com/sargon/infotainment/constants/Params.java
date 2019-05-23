@@ -17,5 +17,6 @@ public class Params {
     public static Date STOP_TIME = null;
     public static int MAX_CONNECTION_RETRY = 5;
     public static String CONNECTION_CHANNEL_ID = "connection_notifications";
+    public static int NOTIFICATION_ID = 101;
 
 }

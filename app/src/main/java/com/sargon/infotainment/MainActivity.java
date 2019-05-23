@@ -1,24 +1,41 @@
 package com.sargon.infotainment;
 
 import android.Manifest;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.animation.Animation;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sargon.infotainment.service.ConnectionService;
 import com.sargon.infotainment.service.MainService;
 import com.sargon.infotainment.constants.Params;
 import com.sargon.infotainment.settings.SettingsActivity;
+
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private ConnectionService cService;
     private Boolean isConnected = false;
     private Boolean connecting = false;
+    private int retryConnection = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +81,26 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "Loading Interface");
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setPadding(0, 56, 0, 0);
+        toolbar.setTitleTextColor(getResources().getColor(R.color.textColor));
+        setSupportActionBar(toolbar);
+
         //start services
         Log.d(TAG, "Start Services");
         connectToServer();
+    }
 
+    @Override
+    protected void onStart(){
+        super.onStart();
+
+        //background management
+        ConstraintLayout lay = findViewById(R.id.coordinatorLayout);
+        lay.setBackgroundResource(R.drawable.background);
+        AnimationDrawable backgroundAnimation = (AnimationDrawable) lay.getBackground();
+        backgroundAnimation.start();
+        //background management
     }
 
     private void connectToServer(){
@@ -96,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
+                        retryConnection = 0;
                         Log.i(TAG, "CONNECTED");
                         TextView connStatusView = findViewById(R.id.line_1);
                         connStatusView.setText(R.string.connected);
@@ -116,6 +151,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDisconnected(String message) {
                 Log.i(TAG, "ON DISCONNECTED");
+
+                retryConnection ++;
+
+
+                Intent intent = new Intent(context, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                NotificationManager nm = context.getSystemService(NotificationManager.class);
+                nm.cancel(Params.NOTIFICATION_ID);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Params.CONNECTION_CHANNEL_ID)
+                        .setChannelId(Params.CONNECTION_CHANNEL_ID)
+                        .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setAutoCancel(false)
+                        .setOngoing(true)
+                        .setContentIntent(pendingIntent)
+                        .setContentTitle("Disconnected")
+                        .setContentText(message);
+
+
+                // notificationId is a unique int for each notification that you must define
+                nm.notify(Params.NOTIFICATION_ID, builder.build());
+
+                if(retryConnection >= Params.MAX_CONNECTION_RETRY){
+                    mService.killServices();
+                    nm.cancelAll();
+                }
 
                 runOnUiThread(new Runnable() {
 
@@ -144,6 +206,8 @@ public class MainActivity extends AppCompatActivity {
                         connecting = false;
 
                         mService.killServices();
+                        NotificationManager nm = getSystemService(NotificationManager.class);
+                        nm.cancelAll();
                     }
                 });
 
@@ -215,6 +279,25 @@ public class MainActivity extends AppCompatActivity {
                                 isConnected = false;
                                 connecting = false;
 
+                                Intent intent = new Intent(context, MainActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                                NotificationManager nm = context.getSystemService(NotificationManager.class);
+                                nm.cancel(Params.NOTIFICATION_ID);
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Params.CONNECTION_CHANNEL_ID)
+                                        .setChannelId(Params.CONNECTION_CHANNEL_ID)
+                                        .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
+                                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                        .setAutoCancel(false)
+                                        .setOngoing(true)
+                                        .setContentIntent(pendingIntent)
+                                        .setContentTitle("Disconnected")
+                                        .setContentText("Disconnected");
+
+
+                                // notificationId is a unique int for each notification that you must define
+                                nm.notify(Params.NOTIFICATION_ID, builder.build());
+
                                 mService.killServices();
                             }
 
@@ -255,6 +338,27 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private int getStatusBarHeight() {
+        int height;
+
+        Resources myResources = getResources();
+        int idStatusBarHeight = myResources.getIdentifier(
+                "status_bar_height", "dimen", "android");
+        if (idStatusBarHeight > 0) {
+            height = getResources().getDimensionPixelSize(idStatusBarHeight);
+            Toast.makeText(this,
+                    "Status Bar Height = " + height,
+                    Toast.LENGTH_LONG).show();
+        }else{
+            height = 0;
+            Toast.makeText(this,
+                    "Resources NOT found",
+                    Toast.LENGTH_LONG).show();
+        }
+
+        return height;
     }
 
 }

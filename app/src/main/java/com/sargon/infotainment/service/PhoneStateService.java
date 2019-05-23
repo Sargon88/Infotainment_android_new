@@ -14,11 +14,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.google.gson.Gson;
 import com.sargon.infotainment.R;
 import com.sargon.infotainment.bean.PhoneStatus;
@@ -49,20 +51,6 @@ public class PhoneStateService extends Service {
         super.onCreate();
         Log.d(TAG, "On Create");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel();
-        }
-
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Params.CONNECTION_CHANNEL_ID);
-        Notification notification = notificationBuilder.setOngoing(true)
-                .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
-                .setPriority(IMPORTANCE_LOW)
-                .setCategory(Notification.CATEGORY_SERVICE)
-                .build();
-
-        startForeground(101, notification);
-
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
@@ -73,6 +61,24 @@ public class PhoneStateService extends Service {
 
         getGpsCoordinates();
         startTimer();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Params.CONNECTION_CHANNEL_ID);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setChannelId(Params.CONNECTION_CHANNEL_ID)
+                .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
+                .setPriority(IMPORTANCE_LOW)
+                //.setCategory(Notification.CATEGORY_SERVICE)
+                .setContentTitle("Connected")
+                .setContentText("Service connected to server")
+                .build();
+
+        startForeground(Params.NOTIFICATION_ID, notification);
+
+
 
         return START_STICKY;
     }

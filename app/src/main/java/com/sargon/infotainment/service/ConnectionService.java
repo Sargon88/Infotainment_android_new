@@ -1,6 +1,7 @@
 package com.sargon.infotainment.service;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.service.notification.StatusBarNotification;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -63,14 +65,6 @@ public class ConnectionService {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Params.CONNECTION_CHANNEL_ID)
-                    .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setAutoCancel(false)
-                    .setVibrate(notifyVibratePatternNoRepeat())
-                    .setOngoing(true)
-                    .setContentIntent(pendingIntent);
-
             SocketSingleton.setContext(context);
             Socket socket = SocketSingleton.getInstance().getSocket();
 
@@ -80,13 +74,23 @@ public class ConnectionService {
                     Log.d(TAG, "CONNECTED");
                     eventConnectedAction();
 
-                    builder.setContentTitle("Connesso")
+                    NotificationManager nm = context.getSystemService(NotificationManager.class);
+                    nm.cancel(Params.NOTIFICATION_ID);
+
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Params.CONNECTION_CHANNEL_ID)
+                            .setChannelId(Params.CONNECTION_CHANNEL_ID)
+                            .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            .setAutoCancel(false)
+                            .setVibrate(notifyVibratePatternNoRepeat())
+                            .setOngoing(true)
+                            .setContentIntent(pendingIntent)
+                            .setContentTitle("Connesso")
                             .setContentText("Connesso al sistema");
 
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 
                     // notificationId is a unique int for each notification that you must define
-                    notificationManager.notify(notificationIdConnect, builder.build());
+                    nm.notify(Params.NOTIFICATION_ID, builder.build());
                 }
             }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
                 @Override
@@ -280,10 +284,12 @@ public class ConnectionService {
             SocketSingleton.getInstance().setConnected(false);
             Log.i(TAG, "SOCKET DISCONNECTED");
             cListener.onDisconnected(null);
+            dismissNotification();
 
         } catch (URISyntaxException e) {
             Log.e(TAG, e.getLocalizedMessage());
             cListener.onError(e.getLocalizedMessage());
+            dismissNotification();
         }
     }
     private void eventConnectionErrorAction(String message) {
@@ -295,6 +301,7 @@ public class ConnectionService {
         } catch (URISyntaxException e) {
             Log.e(TAG, e.getLocalizedMessage());
             cListener.onError(e.getLocalizedMessage());
+            dismissNotification();
         }
     }
     private void vibrate(){
@@ -322,7 +329,7 @@ public class ConnectionService {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 
         // notificationId is a unique int for each notification that you must define
-        notificationManager.cancel(notificationIdConnect);
+        notificationManager.cancel(Params.NOTIFICATION_ID);
 
     }
 }

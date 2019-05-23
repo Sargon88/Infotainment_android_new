@@ -8,11 +8,19 @@
     android:visibility="visible"
     tools:context=".MainActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_height="56dp"
+        android:layout_width="match_parent"
+        android:layout_marginVertical="@dimen/toolbar_vertical_margin"
+        />
+
     <TextView
         android:id="@+id/error_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:layout_marginVertical="@dimen/activity_vertical_margin"/>
 
     <include layout="@layout/content_main" />
 
