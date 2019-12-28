@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.WRITE_CONTACTS,
                         Manifest.permission.READ_CONTACTS,
                         Manifest.permission.READ_CALL_LOG,
                         Manifest.permission.CALL_PHONE,
@@ -68,7 +69,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 

@@ -21,10 +21,14 @@
     <string-array name="ip_list_titles">
         <item>VM (192.168.2.176)</item>
         <item>Macchina (192.168.43.208)</item>
+        <item>Macchina (192.168.43.207)</item>
+        <item>Casa (192.168.1.86)</item>
     </string-array>
     <string-array name="ip_list_values">
         <item>"192.168.2.176"</item>
         <item>"192.168.43.208"</item>
+        <item>"192.168.43.207"</item>
+        <item>"192.168.1.86"</item>
     </string-array>
 
     <string name="port_input_label">Server Port</string>
