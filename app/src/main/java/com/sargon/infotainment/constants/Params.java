@@ -1,5 +1,8 @@
 package com.sargon.infotainment.constants;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.Date;
 
 public class Params {
@@ -18,5 +21,7 @@ public class Params {
     public static int MAX_CONNECTION_RETRY = 5;
     public static String CONNECTION_CHANNEL_ID = "connection_notifications";
     public static int NOTIFICATION_ID = 101;
+    private static GsonBuilder gsonBuilder = new GsonBuilder();
+    public static Gson gson = gsonBuilder.create();
 
 }
