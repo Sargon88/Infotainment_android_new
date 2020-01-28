@@ -37,8 +37,6 @@
         </activity>
         <activity android:name=".settings.SettingsActivity" android:label="@string/title_activity_settings"></activity>
 
-        <service android:name=".service.PhoneStateService" android:enabled="true" />
-
         <receiver android:name=".receiver.PhoneStateReceiver" android:exported="true" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />

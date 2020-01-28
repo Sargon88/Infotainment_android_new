@@ -8,9 +8,9 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
+import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
@@ -36,13 +36,6 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     private static Context context;
     private static Intent intent;
 
-    public PhoneStateReceiver(){}
-
-    public interface PhoneStateListener{
-        void onReceive(String number);
-        void onIdle();
-    }
-
     @Override
     public void onReceive(Context inputContext, Intent inputIntent) {
          Log.i("ccc1 " + TAG, inputIntent.getAction());
@@ -65,6 +58,7 @@ public class PhoneStateReceiver extends BroadcastReceiver {
 
          } else if(intent.getAction().equals("android.intent.action.PHONE_STATE")) {
 
+             /*
              String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
              String number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
              Log.i("ccc1 " + TAG, "State: " + stateStr);
@@ -82,9 +76,88 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                  state = TelephonyManager.CALL_STATE_RINGING;
              }
 
-
              onCallStateChanged(state, number);
+             */
          }
+
+
+         TelephonyManager telephony = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+         telephony.listen(new PhoneStateListener(){
+             @Override
+             public void onCallStateChanged(int state, String number) {
+                 super.onCallStateChanged(state, number);
+
+                 if(lastState == state){
+                     Log.i("ccc " + TAG, "No Change");
+                     //No change, debounce extras
+                     return;
+                 }
+
+                 Log.i("ccc " + TAG, "State: " + state);
+                 try{
+                     switch (state) {
+
+                         case TelephonyManager.CALL_STATE_RINGING:
+                             isIncoming = true;
+                             callStartTime = new Date();
+                             if(number == null || number == ""){
+                                 number = intent.getExtras().getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+
+                                 if(number == "" || number == null){
+                                     number = "Unknown Number";
+                                 }
+                             }
+
+                             savedNumber = number;
+                             onIncomingCallStarted(context, number, callStartTime);
+                             break;
+                         case TelephonyManager.CALL_STATE_OFFHOOK:
+                             //Transition of ringing->offhook are pickups of incoming calls.  Nothing done on them
+                             if(lastState != TelephonyManager.CALL_STATE_RINGING){
+                                 isIncoming = false;
+                                 callStartTime = new Date();
+                                 onOutgoingCallStarted(context, savedNumber, callStartTime);
+                             } else {
+
+                                 onIncomingCallAnswer(context, savedNumber, callStartTime);
+
+                             }
+                             break;
+                         case TelephonyManager.CALL_STATE_IDLE:
+
+                             try {
+                                 if(number == null){
+                                     number = "";
+                                 }
+                                 SocketSingleton.getInstance().sendDataToRaspberry("call end", number);
+                                 PhoneStatusDataBuilder.getInstance().updateStatusData(context);
+
+                             } catch (URISyntaxException e) {
+                                 e.printStackTrace();
+                             }
+
+                             //Useless at this time
+                             //Went to idle-  this is the end of a call.  What type depends on previous state(s)
+                             if(lastState == TelephonyManager.CALL_STATE_RINGING){
+                                 //Ring but no pickup-  a miss
+                                 onMissedCall(context, savedNumber, callStartTime);
+                             }
+                             else if(isIncoming){
+                                 onIncomingCallEnded(context, savedNumber, callStartTime, new Date());
+                             }
+                             else{
+                                 onOutgoingCallEnded(context, savedNumber, callStartTime, new Date());
+                             }
+                             break;
+                     }
+                 } catch (URISyntaxException e) {
+                     Log.e(TAG, e.getLocalizedMessage());
+                 }
+                 lastState = state;
+             }
+         }, PhoneStateListener.LISTEN_CALL_STATE);
+
+
 
     }
 
