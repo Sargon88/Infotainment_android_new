@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.sargon.infotainment.constants.Params;
@@ -61,7 +62,9 @@ public class MainService extends Application{
 
         if(!isMyServiceRunning(phoneStateService.getClass(), context)){
             Log.i(TAG, "Starting PhoneStateService");
-            context.startForegroundService(psServiceIntent);
+            //context.startForegroundService(psServiceIntent);
+            ContextCompat.startForegroundService(context, psServiceIntent);
+            Log.i(TAG, "Starting 2 PhoneStateService");
         }
     }
     public void killServices(){

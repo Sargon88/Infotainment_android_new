@@ -44,12 +44,14 @@ public class PhoneStateService extends Service {
     private LocationManager lManager;
     private LocationListener lListener;
 
-    public PhoneStateService(){}
+    //public PhoneStateService(){}
 
     @Override
     public void onCreate(){
         super.onCreate();
         Log.d(TAG, "On Create");
+
+        phoneStatus = PhoneStatusSingleton.getInstance();
 
     }
     @Override
@@ -68,7 +70,7 @@ public class PhoneStateService extends Service {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, Params.CONNECTION_CHANNEL_ID);
         Notification notification = notificationBuilder.setOngoing(true)
-                .setChannelId(Params.CONNECTION_CHANNEL_ID)
+                //.setChannelId(Params.CONNECTION_CHANNEL_ID)
                 .setSmallIcon(R.mipmap.tachikoma_launcher_foreground)
                 .setPriority(IMPORTANCE_LOW)
                 //.setCategory(Notification.CATEGORY_SERVICE)
