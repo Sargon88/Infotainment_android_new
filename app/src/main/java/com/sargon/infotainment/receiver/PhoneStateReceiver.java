@@ -18,6 +18,8 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.sargon.infotainment.R;
 import com.sargon.infotainment.bean.CallBean;
+import com.sargon.infotainment.bean.PhoneStatus;
+import com.sargon.infotainment.constants.PhoneStatusSingleton;
 import com.sargon.infotainment.constants.SocketSingleton;
 import com.sargon.infotainment.service.PhoneStatusDataBuilder;
 
@@ -242,6 +244,12 @@ public class PhoneStateReceiver extends BroadcastReceiver {
         Log.i("ccc " + TAG, "ENTERED onIncomingCallStarted");
 
         String json = getExtraCallData(ctx, number, "in");
+        PhoneStatus status = PhoneStatusSingleton.getInstance();
+        status.setInCall(true);
+        status.setCalling(false);
+        status.setCallerId(json);
+
+
         SocketSingleton.getInstance().sendDataToRaspberry("incoming calling", json);
     }
 
@@ -249,15 +257,29 @@ public class PhoneStateReceiver extends BroadcastReceiver {
         Log.i("ccc " + TAG, "ENTERED onIncomingCallStarted");
 
         String msg = getExtraCallData(ctx, number, "out");
+        PhoneStatus status = PhoneStatusSingleton.getInstance();
+        status.setInCall(true);
+        status.setCalling(false);
+        status.setCallerId(msg);
+
         SocketSingleton.getInstance().sendDataToRaspberry("outgoing calling", msg);
     }
 
     protected void onIncomingCallEnded(Context ctx, String number, Date start, Date end){
         Log.i("ccc " + TAG, "ENTERED onIncomingCallEnded");
+
+        PhoneStatus status = PhoneStatusSingleton.getInstance();
+        status.setInCall(false);
+        status.setCalling(false);
+        status.setCallerId("");
     }
 
     protected void onOutgoingCallEnded(Context ctx, String number, Date start, Date end){
         Log.i("ccc " + TAG, "ENTERED onOutgoingCallEnded");
+        PhoneStatus status = PhoneStatusSingleton.getInstance();
+        status.setInCall(false);
+        status.setCalling(false);
+        status.setCallerId("");
     }
 
     protected void onMissedCall(Context ctx, String number, Date start){
@@ -267,6 +289,8 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     private void onIncomingCallAnswer(Context ctx, String number, Date start) throws URISyntaxException {
         Log.i("ccc " + TAG, "ENTERED onIncomingCallAnswer");
 
+        PhoneStatus status = PhoneStatusSingleton.getInstance();
+        status.setCalling(true);
         SocketSingleton.getInstance().sendDataToRaspberry("call answer", number);
 
     }

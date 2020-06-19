@@ -8,6 +8,8 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
+import android.telecom.Call;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -56,6 +58,14 @@ public class PhoneStatusDataBuilder {
             psd.setStarredContacts(cpService.getStarredContacts(c));
         }
         psd.setLastCalls(cpService.getLastCalls(c));
+        
+
+/*
+        psd.setCalling();
+        psd.setInCall();
+        psd.setCallerId();
+
+ */
 
     }
 

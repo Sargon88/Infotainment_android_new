@@ -8,7 +8,7 @@ public class PhoneStatus {
     private String page;
     private String longitude;
     private String latitude;
-    private String callerNum;
+    private String callerId;
     private String yturl;
     private String lastUsbStatus;
     private int  brightness;
@@ -44,12 +44,12 @@ public class PhoneStatus {
         this.latitude = latitude;
     }
 
-    public String getCallerNum() {
-        return callerNum;
+    public String getCallerId() {
+        return callerId;
     }
 
-    public void setCallerNum(String callerNum) {
-        this.callerNum = callerNum;
+    public void setCallerId(String callerId) {
+        this.callerId = callerId;
     }
 
     public String getYturl() {
